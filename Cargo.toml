@@ -1,7 +1,7 @@
 [package]
 name = "loadconf"
 description = "Library for loading configuration files quickly."
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Curtis Millar <curtis@curtism.me>"]
 repository = "https://github.com/xurtis/loadconf"
 readme = "README.md"
