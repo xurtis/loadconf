@@ -1,5 +1,6 @@
 [package]
 name = "loadconf"
+description = "Library for loading configuration files quickly."
 version = "0.1.0"
 authors = ["Curtis Millar <curtis@curtism.me>"]
 repository = "https://github.com/xurtis/loadconf"
@@ -11,3 +12,5 @@ license = "ISC"
 [dependencies]
 toml = "0.4"
 serde = "1.0"
+serde_derive = "1.0"
+tempdir = "0.3"
