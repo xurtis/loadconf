@@ -1,3 +1,7 @@
+[![Crate](https://img.shields.io/crates/v/loadconf.svg)][https://crates.io/crates/loadconf]
+[![Documentation](https://docs.rs/loadconf/badge.svg)](https://docs.rs/loadconf/)
+[![Build Status](https://travis-ci.org/xurtis/loadconf.svg?branch=master)](https://travis-ci.org/xurtis/loadconf)
+
 A simple library for loading configuration files from disk. All that's
 required is a struct with `serde::Deserialize` and `Default` implemented.
 
