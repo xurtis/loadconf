@@ -23,22 +23,26 @@ The library will load the first struct it finds in the following list:
 # Usage
 
 ```rust
-use loadconf::Load;
+#[macro_use]
+extern crate serde_derive;
+extern crate loadconf;
 
+/// Sample configuration
 #[derive(Deserialize)]
 struct Config {
-	var: String,
+    /// Sample variable
+    var: String,
 }
 
-impl std::default::Default for Config {
-	fn default () -> Config {
-		Config {
-			var: "Default value".to_string(),
-		}
-	}
+impl Default for Config {
+    fn default() -> Config {
+        Config { var: "Test configuration.".to_string() }
+    }
 }
 
-fn main () {
-	let config = Config.load("filename");
+fn main() {
+    use loadconf::Load;
+
+    let config = Config::load("testcfg");
 }
 ```
