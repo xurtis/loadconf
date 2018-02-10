@@ -58,8 +58,8 @@ pub trait Load: Sized {
 }
 
 impl<C> Load for C
-    where
-        C: Default + DeserializeOwned,
+where
+    C: Default + DeserializeOwned,
 {
     fn try_load(filename: &str) -> Result<C, Error> {
         let paths = path_list(filename);
@@ -73,9 +73,9 @@ impl<C> Load for C
 
 /// Read a configuration from a file.
 fn read_from_file<P, C>(path: P) -> Result<C, Error>
-    where
-        P: AsRef<Path>,
-        C: Default + DeserializeOwned,
+where
+    P: AsRef<Path>,
+    C: Default + DeserializeOwned,
 {
     let mut text = String::new();
     File::open(path)?.read_to_string(&mut text)?;
@@ -125,7 +125,8 @@ fn path_list(name: &str) -> Vec<PathBuf> {
     ];
     paths.append(&mut absolute_paths);
 
-    paths.into_iter()
+    paths
+        .into_iter()
         .map(|p| AsRef::<Path>::as_ref(&p).to_path_buf())
         .collect()
 }
@@ -142,9 +143,7 @@ mod test {
 
     impl Default for Config {
         fn default() -> Config {
-            Config {
-                var: "Test configuration.".to_string(),
-            }
+            Config { var: "Test configuration.".to_string() }
         }
     }
 
@@ -214,9 +213,7 @@ mod test {
 
         // Load the file
         let config = Config::load("testcfg");
-        let expected = Config {
-            var: "Test configuration file".to_string(),
-        };
+        let expected = Config { var: "Test configuration file".to_string() };
         assert_eq!(config, expected);
     }
 }
