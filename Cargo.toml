@@ -2,5 +2,10 @@
 name = "loadconf"
 version = "0.1.0"
 authors = ["Curtis Millar <curtis@curtism.me>"]
+repository = "https://github.com/xurtis/loadconf"
+readme = "README.md"
+keywords = ["config", "conf"]
+categories = ["config"]
+licence = "ISC"
 
 [dependencies]
