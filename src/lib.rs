@@ -20,6 +20,33 @@
 //! 1. `/etc/.config/{name}.toml`
 //! 1. `/etc/.config/{name}/config`
 //! 1. `/etc/.config/{name}/config.toml`
+//!
+//! # Example Usage
+//!
+//! ```rust
+//! #[macro_use]
+//! extern crate serde_derive;
+//! extern crate loadconf;
+//!
+//! /// Sample configuration
+//! #[derive(Deserialize)]
+//! struct Config {
+//!     /// Sample variable
+//!     var: String,
+//! }
+//!
+//! impl Default for Config {
+//!     fn default() -> Config {
+//!         Config { var: "Test configuration.".to_string() }
+//!     }
+//! }
+//!
+//! fn main() {
+//!     use loadconf::Load;
+//!
+//!     let config = Config::load("testcfg");
+//! }
+//! ```
 
 extern crate serde;
 #[allow(unused_imports)]
