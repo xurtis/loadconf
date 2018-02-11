@@ -44,7 +44,14 @@
 //! fn main() {
 //!     use loadconf::Load;
 //!
-//!     let config = Config::load("testcfg");
+//!     // Just search for configuration files
+//!     let config = Config::load("sample");
+//!
+//!     // Optionally use file specified on command line.
+//!     use std::env;
+//!     let mut args = env::args();
+//!     args.next();
+//!     let config = Config::fallback_load("sample", args.next());
 //! }
 //! ```
 
@@ -75,25 +82,52 @@ pub trait Load: Sized {
     ///
     /// This will panic if there are any issues reading or deserializing the file.
     /// To catch these errors, use `try_load` instead.
-    fn load(filename: &str) -> Self {
+    fn load<S: AsRef<str>>(filename: S) -> Self {
         Load::try_load(filename).expect("Error reading configuration from file")
     }
 
     /// Find a configuration file and load the contents, falling back to
     /// the default. Errors if file can't be read or deserialized.
-    fn try_load(filename: &str) -> Result<Self, Error>;
+    fn try_load<S: AsRef<str>>(filename: S) -> Result<Self, Error> {
+        Load::try_fallback_load::<S, &str>(filename, None)
+    }
+
+    /// Loads the configuration from the given path or falls back to search if
+    /// the path is None.
+    ///
+    /// # Panics
+    ///
+    /// This will panic if there are any issues reading or deserializing the file.
+    /// To catch these errors, use `try_load` instead.
+    fn fallback_load<S: AsRef<str>, P: AsRef<Path>>(filename: S, path: Option<P>) -> Self {
+        Load::try_fallback_load(filename, path).expect("Error reading configuration from file")
+    }
+
+    /// Loads the configuration from the given path or falls back to search if
+    /// the path is None. Errors if file can't be read or deserialized.
+    fn try_fallback_load<S: AsRef<str>, P: AsRef<Path>>(
+        filename: S,
+        path: Option<P>,
+    ) -> Result<Self, Error>;
 }
 
 impl<C> Load for C
 where
     C: Default + DeserializeOwned,
 {
-    fn try_load(filename: &str) -> Result<C, Error> {
-        let paths = path_list(filename);
+    fn try_fallback_load<S: AsRef<str>, P: AsRef<Path>>(
+        filename: S,
+        path: Option<P>,
+    ) -> Result<C, Error> {
+        if let Some(path) = path {
+            read_from_file(path.as_ref())
+        } else {
+            let paths = path_list(filename.as_ref());
 
-        match paths.iter().find(|p| p.exists()) {
-            Some(path) => read_from_file(path),
-            None => Ok(Default::default()),
+            match paths.iter().find(|p| p.exists()) {
+                Some(path) => read_from_file(path),
+                None => Ok(Default::default()),
+            }
         }
     }
 }
@@ -240,6 +274,36 @@ mod test {
 
         // Load the file
         let config = Config::load("testcfg");
+        let expected = Config { var: "Test configuration file".to_string() };
+        assert_eq!(config, expected);
+    }
+
+    /// Test load configuration from a file specified directly.
+    #[test]
+    fn specified_file_test() {
+        use std::env::set_current_dir;
+        use std::fs::OpenOptions;
+        use std::io::Write;
+        use super::Load;
+        use tempdir::TempDir;
+
+        // Change into temporary testi directory
+        let temp_dir = TempDir::new("loadcfg-test")
+            .expect("Could not create temporary directory for test");
+        set_current_dir(temp_dir.path())
+            .expect("Could not change into temporary directory for test");
+
+        // Write the test configuration file.
+        OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open("given-config.toml")
+            .expect("Couldn't open test configuration file.")
+            .write_all("var = \"Test configuration file\"\n".as_bytes())
+            .expect("Couldn't write test configuration file.");
+
+        // Load the file
+        let config = Config::fallback_load("testcfg", Some("given-config.toml"));
         let expected = Config { var: "Test configuration file".to_string() };
         assert_eq!(config, expected);
     }
