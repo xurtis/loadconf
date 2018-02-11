@@ -105,14 +105,20 @@ pub trait Load: Sized {
 
     /// Loads the configuration from the given path or falls back to search if
     /// the path is None. Errors if file can't be read or deserialized.
-    fn try_fallback_load<S: AsRef<str>, P: AsRef<Path>>(filename: S, path: Option<P>) -> Result<Self, Error>;
+    fn try_fallback_load<S: AsRef<str>, P: AsRef<Path>>(
+        filename: S,
+        path: Option<P>,
+    ) -> Result<Self, Error>;
 }
 
 impl<C> Load for C
 where
     C: Default + DeserializeOwned,
 {
-    fn try_fallback_load<S: AsRef<str>, P: AsRef<Path>>(filename: S, path: Option<P>) -> Result<C, Error> {
+    fn try_fallback_load<S: AsRef<str>, P: AsRef<Path>>(
+        filename: S,
+        path: Option<P>,
+    ) -> Result<C, Error> {
         if let Some(path) = path {
             read_from_file(path.as_ref())
         } else {
