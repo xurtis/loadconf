@@ -44,7 +44,14 @@
 //! fn main() {
 //!     use loadconf::Load;
 //!
-//!     let config = Config::load("testcfg");
+//!     // Just search for configuration files
+//!     let config = Config::load("sample");
+//!
+//!     // Optionally use file specified on command line.
+//!     use std::env;
+//!     let mut args = env::args();
+//!     args.next();
+//!     let config = Config::fallback_load("sample", args.next());
 //! }
 //! ```
 
@@ -82,7 +89,7 @@ pub trait Load: Sized {
     /// Find a configuration file and load the contents, falling back to
     /// the default. Errors if file can't be read or deserialized.
     fn try_load<S: AsRef<str>>(filename: S) -> Result<Self, Error> {
-        Load::try_fallback_load(filename, None)
+        Load::try_fallback_load::<S, &str>(filename, None)
     }
 
     /// Loads the configuration from the given path or falls back to search if
@@ -92,20 +99,20 @@ pub trait Load: Sized {
     ///
     /// This will panic if there are any issues reading or deserializing the file.
     /// To catch these errors, use `try_load` instead.
-    fn fallback_load<S: AsRef<str>>(filename: S, path: Option<S>) -> Self {
+    fn fallback_load<S: AsRef<str>, P: AsRef<Path>>(filename: S, path: Option<P>) -> Self {
         Load::try_fallback_load(filename, path).expect("Error reading configuration from file")
     }
 
     /// Loads the configuration from the given path or falls back to search if
     /// the path is None. Errors if file can't be read or deserialized.
-    fn try_fallback_load<S: AsRef<str>>(filename: S, path: Option<S>) -> Result<Self, Error>;
+    fn try_fallback_load<S: AsRef<str>, P: AsRef<Path>>(filename: S, path: Option<P>) -> Result<Self, Error>;
 }
 
 impl<C> Load for C
 where
     C: Default + DeserializeOwned,
 {
-    fn try_fallback_load<S: AsRef<str>>(filename: S, path: Option<S>) -> Result<C, Error> {
+    fn try_fallback_load<S: AsRef<str>, P: AsRef<Path>>(filename: S, path: Option<P>) -> Result<C, Error> {
         if let Some(path) = path {
             read_from_file(path.as_ref())
         } else {
